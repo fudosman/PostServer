@@ -1,56 +1,41 @@
-const express = require("express");
-const app = express();
-const cors = require("cors");
-const rateLimiter = require("express-rate-limit");
-const routes = require("./routes");
-const { error404, errorHandler } = require("./errors");
-const morgan = require("morgan");
-const fs = require("fs");
-const path = require("path");
-const helmet = require("helmet");
-const { ENV } = require("./configs");
+const express = require('express')
+const morgan = require('morgan')
+const helmet = require('helmet')
+const dotenv = require('dotenv')
+const cookieParser = require('cookie-parser')
 
+const router = require('./routes/route')
+const connect = require('./config/db.config')
 
-// log all requests
-app.use(
-   morgan("common", {
-      stream: fs.createWriteStream(path.join(__dirname, "access.log"), {
-         flags: "a",
-      }),
-   })
-);
+dotenv.config()
 
-app.use(morgan("tiny"));
-app.use(
-   rateLimiter({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 500, // limit each IP to 500 requests per windowMs
-   })
-);
-app.use(express.json({ limit: "100mb", extended: true }));
-app.use(helmet());
-app.use(helmet.frameguard({ action: "sameorigin" }));
-app.use(
-   cors({
-      origin: "*",
-      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-      preflightContinue: false,
-      optionsSuccessStatus: 204,
-      credentials: true,
-   })
-);
+const Uri = process.env.MONGODB_URI
+const PORT = process.env.PORT
 
-app.use(express.urlencoded({ limit: "100mb", extended: true, parameterLimit: 500000 }));
+const app = express()
 
-app.use((req, res, next) => {
-   console.log("Request received:", req.method, req.url);
-   next();
+// Allows us to send and receive json files 
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(morgan('common'))
+app.use(helmet())
+
+// Allows us to access a user's token stored as a cookie
+app.use(cookieParser())
+
+// Lets the server listen on all files
+app.use('/api/v1', router)
+
+// Define a health check route that responds with a 200 status code
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json('Relax, brov. Everything is alright..');
 });
 
+// Our port is converted to a number
+const port = parseFloat(PORT) || 3000
 
-// routes
-app.use("/api", routes);
-app.use("*", error404);
-app.use(errorHandler);
-
-module.exports = app;
+// Server listening for requests
+app.listen(port, '0.0.0.0', () => {
+  connect(Uri)
+  console.log(`Server connected on port ${port}`)
+})

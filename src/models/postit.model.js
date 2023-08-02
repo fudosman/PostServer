@@ -1,11 +1,10 @@
-const { model, Schema } = require('mongoose')
+const { model, Schema} = require('mongoose')
 const ObjectId = Schema.Types.ObjectId
 
-
-const commentSchema = new Schema({
+const postitSchema = new Schema({
     author: {
         type: ObjectId,
-        ref: 'User'
+        ref: 'User',
     },
     content:{
         type: String,
@@ -15,15 +14,15 @@ const commentSchema = new Schema({
         minlength: 1,
         maxlength: 300,
     },
-    postit:  {
+    comments: [{
         type: ObjectId,
-        ref: 'Postit'
-    },
+        ref: 'Comment'
+    }],
     deleted: {
         type: Boolean,
         default: false
     }
 }, {timestamps: true})
 
-const Comment = model('Comment', commentSchema)
-module.exports = Comment;
+const Postit = model('Postit', postitSchema)
+module.exports = Postit;

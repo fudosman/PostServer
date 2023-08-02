@@ -1,21 +1,53 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const DbService = require("./data.service");
-
+const { model, Schema} = require('mongoose')
+const ObjectId = Schema.Types.ObjectId
 
 const userSchema = new Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  following: [{ type: Schema.Types.ObjectId, ref: 'User' }]
-});
+    fullname:{
+        type: String,
+        lowercase: true,
+        required: true,
+        trim: true,
+        minlength: 3,
+    },
+    username: {
+        type: String,
+        unique: true,
+        lowercase: true,
+        required: true,
+        trim: true,
+        minlength: 2,
+    },
+    avatar: String,
+    email: {
+        type: String,
+        lowercase: true,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true,
+        minlength: 8,
+    },
+    age: {
+        type: Number,
+        required: true,
+        min: 13
+    },
+    postits: [{
+        type: ObjectId,
+        ref: 'Postit'
+    }],
+    replies: [{
+        type: ObjectId,
+        ref: 'Comment'
+    }],
+    deleted: {
+        type: Boolean,
+        default: false
+    }
+}, {timestamps: true})
 
-const User = mongoose.model('User', userSchema);
-const UserService = new DbService(User);
-
-
-module.exports = {
-  User,
-  UserService
-};
+const User = model('User', userSchema)
+module.exports = User;
