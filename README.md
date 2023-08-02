@@ -5,7 +5,7 @@ securely make posts, make comments on the posts and the owner of the post can ma
 
 ## Features
 
-- User registration: Create a user accounts
+- User registration: Create a user accounts and assin them an avatar
 - Authentication: login users based on their credentials.
 - Logout users from the system
 - Post management: Users can get update and delete their posts,
